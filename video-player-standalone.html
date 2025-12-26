@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .video-wrapper {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        video {
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: #000;
+        }
+
+        .video-info {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .video-info p {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        #fileInput {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #fileInput:hover {
+            border-color: #764ba2;
+            background: #f8f9fa;
+        }
+
+        #fileInput::file-selector-button {
+            padding: 10px 20px;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 15px;
+            transition: transform 0.2s ease;
+        }
+
+        #fileInput::file-selector-button:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 768px) {
+            .video-wrapper {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="video-wrapper">
+            <h1>Video Player</h1>
+            <video id="videoPlayer" controls>
+                <source src="sample-video.mp4" type="video/mp4">
+                <source src="sample-video.webm" type="video/webm">
+                Your browser does not support the video tag.
+            </video>
+            <div class="video-info">
+                <p>Upload your own video file by selecting a file below. The video will load and play automatically!</p>
+                <input type="file" id="fileInput" accept="video/*">
+            </div>
+        </div>
+    </div>
+    <script>
+        // Handle custom video file upload
+        const fileInput = document.getElementById('fileInput');
+        const videoPlayer = document.getElementById('videoPlayer');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                videoPlayer.src = fileURL;
+                videoPlayer.load();
+                videoPlayer.play();
+            }
+        });
+
+        // Optional: Add keyboard controls
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    if (videoPlayer.paused) {
+                        videoPlayer.play();
+                    } else {
+                        videoPlayer.pause();
+                    }
+                    break;
+                case 'ArrowRight':
+                    videoPlayer.currentTime += 5;
+                    break;
+                case 'ArrowLeft':
+                    videoPlayer.currentTime -= 5;
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
