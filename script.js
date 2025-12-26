@@ -5,12 +5,29 @@ const canvas = document.getElementById('poseCanvas');
 const canvasCtx = canvas.getContext('2d');
 const toggleButton = document.getElementById('togglePose');
 const statusDiv = document.getElementById('status');
+const exportButton = document.getElementById('exportExcel');
+const recordingInfo = document.getElementById('recordingInfo');
 
 // Pose detection state
 let poseDetectionEnabled = false;
 let pose = null;
 let animationFrameId = null;
 let lastProcessedTime = -1;
+
+// Data collection for export
+let poseData = [];
+let frameCount = 0;
+
+// Joint names mapping (MediaPipe Pose 33 landmarks)
+const LANDMARK_NAMES = [
+    'nose', 'left_eye_inner', 'left_eye', 'left_eye_outer', 'right_eye_inner',
+    'right_eye', 'right_eye_outer', 'left_ear', 'right_ear', 'mouth_left',
+    'mouth_right', 'left_shoulder', 'right_shoulder', 'left_elbow', 'right_elbow',
+    'left_wrist', 'right_wrist', 'left_pinky', 'right_pinky', 'left_index',
+    'right_index', 'left_thumb', 'right_thumb', 'left_hip', 'right_hip',
+    'left_knee', 'right_knee', 'left_ankle', 'right_ankle', 'left_heel',
+    'right_heel', 'left_foot_index', 'right_foot_index'
+];
 
 // Initialize MediaPipe Pose
 function initializePose() {
@@ -41,6 +58,26 @@ function onPoseResults(results) {
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (results.poseLandmarks) {
+        // Collect data for export (convert normalized coordinates to pixels)
+        const frameData = {
+            frame: frameCount++,
+            timestamp: videoPlayer.currentTime.toFixed(3),
+            landmarks: {}
+        };
+
+        results.poseLandmarks.forEach((landmark, index) => {
+            const jointName = LANDMARK_NAMES[index];
+            frameData.landmarks[jointName] = {
+                x: Math.round(landmark.x * canvas.width),
+                y: Math.round(landmark.y * canvas.height),
+                z: landmark.z,
+                visibility: landmark.visibility
+            };
+        });
+
+        poseData.push(frameData);
+        updateRecordingInfo();
+
         // Draw connectors (skeleton)
         drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
             color: '#00FF00',
@@ -97,6 +134,9 @@ toggleButton.addEventListener('click', () => {
         if (!pose) {
             initializePose();
         }
+
+        // Clear previous data and start fresh
+        clearPoseData();
 
         // Reset time tracking to start fresh
         lastProcessedTime = -1;
@@ -159,6 +199,9 @@ fileInput.addEventListener('change', function(e) {
 
         // Reset time tracking for new video
         lastProcessedTime = -1;
+
+        // Clear previous pose data for new video
+        clearPoseData();
     }
 });
 
@@ -186,6 +229,78 @@ document.addEventListener('keydown', function(e) {
             break;
     }
 });
+
+// Update recording info display
+function updateRecordingInfo() {
+    if (poseData.length > 0) {
+        recordingInfo.textContent = `Recorded: ${poseData.length} frames`;
+        recordingInfo.classList.add('recording');
+        exportButton.disabled = false;
+    } else {
+        recordingInfo.textContent = 'No data recorded yet';
+        recordingInfo.classList.remove('recording');
+        exportButton.disabled = true;
+    }
+}
+
+// Export pose data to Excel
+function exportToExcel() {
+    if (poseData.length === 0) {
+        alert('No pose data to export. Enable pose detection and play a video first.');
+        return;
+    }
+
+    // Create Excel data structure
+    const excelData = [];
+
+    // Add header row
+    const headerRow = ['Frame', 'Timestamp (s)'];
+    LANDMARK_NAMES.forEach(name => {
+        headerRow.push(`${name}_x`, `${name}_y`);
+    });
+    excelData.push(headerRow);
+
+    // Add data rows
+    poseData.forEach(frameData => {
+        const row = [frameData.frame, frameData.timestamp];
+        LANDMARK_NAMES.forEach(name => {
+            const landmark = frameData.landmarks[name];
+            if (landmark) {
+                row.push(landmark.x, landmark.y);
+            } else {
+                row.push('', '');
+            }
+        });
+        excelData.push(row);
+    });
+
+    // Create worksheet and workbook
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Pose Data');
+
+    // Generate filename with timestamp
+    const now = new Date();
+    const filename = `pose_coordinates_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}.xlsx`;
+
+    // Download file
+    XLSX.writeFile(wb, filename);
+
+    alert(`Exported ${poseData.length} frames to ${filename}`);
+}
+
+// Clear pose data when starting new detection
+function clearPoseData() {
+    poseData = [];
+    frameCount = 0;
+    updateRecordingInfo();
+}
+
+// Export button click handler
+exportButton.addEventListener('click', exportToExcel);
+
+// Initialize export button state
+updateRecordingInfo();
 
 // Helper function to draw connectors
 function drawConnectors(ctx, landmarks, connections, style) {

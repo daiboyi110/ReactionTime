@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -25,6 +26,10 @@
             <div class="controls">
                 <button id="togglePose" class="toggle-button">Enable Pose Detection</button>
                 <div id="status" class="status">Pose Detection: OFF</div>
+            </div>
+            <div class="export-controls">
+                <button id="exportExcel" class="export-button">Export Coordinates to Excel</button>
+                <div id="recordingInfo" class="recording-info">No data recorded yet</div>
             </div>
             <div class="video-info">
                 <p>Upload your own video file with people in it to see pose detection in action!</p>

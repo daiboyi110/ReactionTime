@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -117,6 +118,59 @@
             border-color: #f5576c;
         }
 
+        .export-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            gap: 15px;
+        }
+
+        .export-button {
+            padding: 12px 24px;
+            border: none;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .export-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .export-button:active {
+            transform: translateY(0);
+        }
+
+        .export-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .recording-info {
+            color: #555;
+            font-weight: 600;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            font-size: 0.9rem;
+        }
+
+        .recording-info.recording {
+            color: #11998e;
+            border-color: #11998e;
+        }
+
         .video-info {
             margin-top: 30px;
             padding: 20px;
@@ -180,6 +234,16 @@
                 width: 100%;
                 text-align: center;
             }
+
+            .export-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .export-button, .recording-info {
+                width: 100%;
+                text-align: center;
+            }
         }
     </style>
 </head>
@@ -199,6 +263,10 @@
                 <button id="togglePose" class="toggle-button">Enable Pose Detection</button>
                 <div id="status" class="status">Pose Detection: OFF</div>
             </div>
+            <div class="export-controls">
+                <button id="exportExcel" class="export-button">Export Coordinates to Excel</button>
+                <div id="recordingInfo" class="recording-info">No data recorded yet</div>
+            </div>
             <div class="video-info">
                 <p>Upload your own video file with people in it to see pose detection in action! Press 'P' to toggle pose detection.</p>
                 <input type="file" id="fileInput" accept="video/*">
@@ -213,12 +281,29 @@
         const canvasCtx = canvas.getContext('2d');
         const toggleButton = document.getElementById('togglePose');
         const statusDiv = document.getElementById('status');
+        const exportButton = document.getElementById('exportExcel');
+        const recordingInfo = document.getElementById('recordingInfo');
 
         // Pose detection state
         let poseDetectionEnabled = false;
         let pose = null;
         let animationFrameId = null;
         let lastProcessedTime = -1;
+
+        // Data collection for export
+        let poseData = [];
+        let frameCount = 0;
+
+        // Joint names mapping (MediaPipe Pose 33 landmarks)
+        const LANDMARK_NAMES = [
+            'nose', 'left_eye_inner', 'left_eye', 'left_eye_outer', 'right_eye_inner',
+            'right_eye', 'right_eye_outer', 'left_ear', 'right_ear', 'mouth_left',
+            'mouth_right', 'left_shoulder', 'right_shoulder', 'left_elbow', 'right_elbow',
+            'left_wrist', 'right_wrist', 'left_pinky', 'right_pinky', 'left_index',
+            'right_index', 'left_thumb', 'right_thumb', 'left_hip', 'right_hip',
+            'left_knee', 'right_knee', 'left_ankle', 'right_ankle', 'left_heel',
+            'right_heel', 'left_foot_index', 'right_foot_index'
+        ];
 
         // Initialize MediaPipe Pose
         function initializePose() {
@@ -249,6 +334,26 @@
             canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (results.poseLandmarks) {
+                // Collect data for export (convert normalized coordinates to pixels)
+                const frameData = {
+                    frame: frameCount++,
+                    timestamp: videoPlayer.currentTime.toFixed(3),
+                    landmarks: {}
+                };
+
+                results.poseLandmarks.forEach((landmark, index) => {
+                    const jointName = LANDMARK_NAMES[index];
+                    frameData.landmarks[jointName] = {
+                        x: Math.round(landmark.x * canvas.width),
+                        y: Math.round(landmark.y * canvas.height),
+                        z: landmark.z,
+                        visibility: landmark.visibility
+                    };
+                });
+
+                poseData.push(frameData);
+                updateRecordingInfo();
+
                 // Draw connectors (skeleton)
                 drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
                     color: '#00FF00',
@@ -305,6 +410,9 @@
                 if (!pose) {
                     initializePose();
                 }
+
+                // Clear previous data and start fresh
+                clearPoseData();
 
                 // Reset time tracking to start fresh
                 lastProcessedTime = -1;
@@ -367,6 +475,9 @@
 
                 // Reset time tracking for new video
                 lastProcessedTime = -1;
+
+                // Clear previous pose data for new video
+                clearPoseData();
             }
         });
 
@@ -394,6 +505,78 @@
                     break;
             }
         });
+
+        // Update recording info display
+        function updateRecordingInfo() {
+            if (poseData.length > 0) {
+                recordingInfo.textContent = `Recorded: ${poseData.length} frames`;
+                recordingInfo.classList.add('recording');
+                exportButton.disabled = false;
+            } else {
+                recordingInfo.textContent = 'No data recorded yet';
+                recordingInfo.classList.remove('recording');
+                exportButton.disabled = true;
+            }
+        }
+
+        // Export pose data to Excel
+        function exportToExcel() {
+            if (poseData.length === 0) {
+                alert('No pose data to export. Enable pose detection and play a video first.');
+                return;
+            }
+
+            // Create Excel data structure
+            const excelData = [];
+
+            // Add header row
+            const headerRow = ['Frame', 'Timestamp (s)'];
+            LANDMARK_NAMES.forEach(name => {
+                headerRow.push(`${name}_x`, `${name}_y`);
+            });
+            excelData.push(headerRow);
+
+            // Add data rows
+            poseData.forEach(frameData => {
+                const row = [frameData.frame, frameData.timestamp];
+                LANDMARK_NAMES.forEach(name => {
+                    const landmark = frameData.landmarks[name];
+                    if (landmark) {
+                        row.push(landmark.x, landmark.y);
+                    } else {
+                        row.push('', '');
+                    }
+                });
+                excelData.push(row);
+            });
+
+            // Create worksheet and workbook
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Pose Data');
+
+            // Generate filename with timestamp
+            const now = new Date();
+            const filename = `pose_coordinates_${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}.xlsx`;
+
+            // Download file
+            XLSX.writeFile(wb, filename);
+
+            alert(`Exported ${poseData.length} frames to ${filename}`);
+        }
+
+        // Clear pose data when starting new detection
+        function clearPoseData() {
+            poseData = [];
+            frameCount = 0;
+            updateRecordingInfo();
+        }
+
+        // Export button click handler
+        exportButton.addEventListener('click', exportToExcel);
+
+        // Initialize export button state
+        updateRecordingInfo();
 
         // Helper function to draw connectors
         function drawConnectors(ctx, landmarks, connections, style) {
