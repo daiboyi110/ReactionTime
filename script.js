@@ -10,6 +10,7 @@ const statusDiv = document.getElementById('status');
 let poseDetectionEnabled = false;
 let pose = null;
 let animationFrameId = null;
+let lastProcessedTime = -1;
 
 // Initialize MediaPipe Pose
 function initializePose() {
@@ -63,16 +64,22 @@ async function detectPose() {
         return;
     }
 
-    // Ensure canvas size matches video
-    if (canvas.width !== videoPlayer.videoWidth || canvas.height !== videoPlayer.videoHeight) {
-        canvas.width = videoPlayer.videoWidth;
-        canvas.height = videoPlayer.videoHeight;
+    // Only process if we've moved to a new frame (respects video's native frame rate)
+    const currentTime = videoPlayer.currentTime;
+    if (currentTime !== lastProcessedTime) {
+        lastProcessedTime = currentTime;
+
+        // Ensure canvas matches video's native resolution
+        if (canvas.width !== videoPlayer.videoWidth || canvas.height !== videoPlayer.videoHeight) {
+            canvas.width = videoPlayer.videoWidth;
+            canvas.height = videoPlayer.videoHeight;
+        }
+
+        // Send frame to pose detection at video's actual sampling rate
+        await pose.send({ image: videoPlayer });
     }
 
-    // Send frame to pose detection
-    await pose.send({ image: videoPlayer });
-
-    // Schedule next frame
+    // Schedule next check
     animationFrameId = requestAnimationFrame(detectPose);
 }
 
@@ -90,6 +97,9 @@ toggleButton.addEventListener('click', () => {
         if (!pose) {
             initializePose();
         }
+
+        // Reset time tracking to start fresh
+        lastProcessedTime = -1;
 
         // Start detection if video is playing
         if (!videoPlayer.paused) {
@@ -109,12 +119,16 @@ toggleButton.addEventListener('click', () => {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
         }
+
+        // Reset time tracking
+        lastProcessedTime = -1;
     }
 });
 
 // Start pose detection when video plays
 videoPlayer.addEventListener('play', () => {
     if (poseDetectionEnabled && pose) {
+        lastProcessedTime = -1; // Reset to ensure we process from current position
         detectPose();
     }
 });
@@ -142,6 +156,9 @@ fileInput.addEventListener('change', function(e) {
         videoPlayer.src = fileURL;
         videoPlayer.load();
         videoPlayer.play();
+
+        // Reset time tracking for new video
+        lastProcessedTime = -1;
     }
 });
 
