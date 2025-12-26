@@ -28,24 +28,43 @@ const LANDMARK_NAMES = [
     'right_heel', 'left_foot_index', 'right_foot_index'
 ];
 
-// Initialize MediaPipe Pose
-function initializePose() {
-    pose = new Pose({
-        locateFile: (file) => {
-            return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+// Initialize MediaPipe Pose (async version)
+async function initializePoseAsync() {
+    console.log('Initializing MediaPipe Pose...');
+
+    return new Promise((resolve, reject) => {
+        try {
+            pose = new Pose({
+                locateFile: (file) => {
+                    return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`;
+                }
+            });
+
+            pose.setOptions({
+                modelComplexity: 1,
+                smoothLandmarks: true,
+                enableSegmentation: false,
+                smoothSegmentation: false,
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
+            });
+
+            pose.onResults(onPoseResults);
+
+            // MediaPipe Pose loads model files asynchronously
+            // We'll consider it ready after setting up callbacks
+            console.log('MediaPipe Pose initialized successfully!');
+
+            // Give it a moment to load
+            setTimeout(() => {
+                resolve();
+            }, 500);
+
+        } catch (error) {
+            console.error('Error creating Pose instance:', error);
+            reject(error);
         }
     });
-
-    pose.setOptions({
-        modelComplexity: 1,
-        smoothLandmarks: true,
-        enableSegmentation: false,
-        smoothSegmentation: false,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5
-    });
-
-    pose.onResults(onPoseResults);
 }
 
 // Handle pose detection results
@@ -56,7 +75,7 @@ function onPoseResults(results) {
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (results.poseLandmarks) {
+    if (results.poseLandmarks && results.poseLandmarks.length > 0) {
         // Collect data for export (convert normalized coordinates to pixels)
         const frameData = {
             frame: frameCount++,
@@ -96,39 +115,63 @@ function onPoseResults(results) {
 
 // Process video frame for pose detection (called for every video frame)
 async function detectPose(now, metadata) {
-    if (!poseDetectionEnabled) {
+    if (!poseDetectionEnabled || !pose) {
         return;
     }
 
-    // Ensure canvas matches video's native resolution
-    if (canvas.width !== videoPlayer.videoWidth || canvas.height !== videoPlayer.videoHeight) {
-        canvas.width = videoPlayer.videoWidth;
-        canvas.height = videoPlayer.videoHeight;
-    }
+    try {
+        // Ensure canvas matches video's native resolution
+        if (canvas.width !== videoPlayer.videoWidth || canvas.height !== videoPlayer.videoHeight) {
+            canvas.width = videoPlayer.videoWidth;
+            canvas.height = videoPlayer.videoHeight;
+        }
 
-    // Send frame to pose detection (processes every video frame at native frame rate)
-    await pose.send({ image: videoPlayer });
+        // Send frame to pose detection (processes every video frame at native frame rate)
+        await pose.send({ image: videoPlayer });
 
-    // Schedule next frame callback (will be called for every video frame)
-    if (poseDetectionEnabled && !videoPlayer.paused && !videoPlayer.ended) {
-        videoFrameCallbackId = videoPlayer.requestVideoFrameCallback(detectPose);
+        // Schedule next frame callback (will be called for every video frame)
+        if (poseDetectionEnabled && !videoPlayer.paused && !videoPlayer.ended) {
+            videoFrameCallbackId = videoPlayer.requestVideoFrameCallback(detectPose);
+        }
+    } catch (error) {
+        console.error('Error in pose detection:', error);
+        // Continue with next frame even if this one fails
+        if (poseDetectionEnabled && !videoPlayer.paused && !videoPlayer.ended) {
+            videoFrameCallbackId = videoPlayer.requestVideoFrameCallback(detectPose);
+        }
     }
 }
 
 // Toggle pose detection
-toggleButton.addEventListener('click', () => {
+toggleButton.addEventListener('click', async () => {
     poseDetectionEnabled = !poseDetectionEnabled;
 
     if (poseDetectionEnabled) {
-        toggleButton.textContent = 'Disable Pose Detection';
-        toggleButton.classList.add('active');
-        statusDiv.textContent = 'Pose Detection: ON';
+        toggleButton.textContent = 'Initializing...';
+        toggleButton.disabled = true;
+        statusDiv.textContent = 'Pose Detection: Initializing...';
         statusDiv.classList.add('active');
 
         // Initialize pose if not already done
         if (!pose) {
-            initializePose();
+            try {
+                await initializePoseAsync();
+                console.log('Pose initialized, ready to detect');
+            } catch (error) {
+                console.error('Failed to initialize pose:', error);
+                poseDetectionEnabled = false;
+                toggleButton.textContent = 'Enable Pose Detection';
+                toggleButton.disabled = false;
+                statusDiv.textContent = 'Pose Detection: Failed to Initialize';
+                statusDiv.classList.remove('active');
+                return;
+            }
         }
+
+        toggleButton.textContent = 'Disable Pose Detection';
+        toggleButton.disabled = false;
+        toggleButton.classList.add('active');
+        statusDiv.textContent = 'Pose Detection: ON';
 
         // Clear previous data and start fresh
         clearPoseData();
