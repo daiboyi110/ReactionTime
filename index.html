@@ -12,14 +12,23 @@
 
         <!-- Budget Input Section -->
         <div class="budget-section">
-            <label for="budget-input">Set Your Budget:</label>
+            <label>Add Budget Category:</label>
             <div class="input-group">
-                <input type="number" id="budget-input" placeholder="Enter your budget" min="0" step="0.01">
-                <button id="set-budget-btn">Set Budget</button>
+                <input type="text" id="category-input" placeholder="Category (e.g., Food, Entertainment)" required>
+                <input type="number" id="budget-input" placeholder="Budget amount" min="0" step="0.01" required>
+                <button id="set-budget-btn">Add Budget</button>
             </div>
         </div>
 
-        <!-- Budget Display -->
+        <!-- Budget Categories List -->
+        <div class="budget-categories-section">
+            <h2>Budget Categories</h2>
+            <div id="budget-categories-list" class="budget-categories-list">
+                <p class="empty-message">No budget categories added yet</p>
+            </div>
+        </div>
+
+        <!-- Overall Budget Display -->
         <div class="budget-display">
             <div class="budget-item">
                 <span class="label">Total Budget:</span>
@@ -30,7 +39,7 @@
                 <span class="value" id="total-spent">$0.00</span>
             </div>
             <div class="budget-item balance">
-                <span class="label">Balance:</span>
+                <span class="label">Overall Balance:</span>
                 <span class="value" id="balance">$0.00</span>
             </div>
         </div>
@@ -39,6 +48,9 @@
         <div class="add-item-section">
             <h2>Add Expense Item</h2>
             <div class="form-group">
+                <select id="item-category" required>
+                    <option value="">Select category</option>
+                </select>
                 <input type="text" id="item-name" placeholder="Item name" required>
                 <input type="number" id="item-cost" placeholder="Cost" min="0" step="0.01" required>
                 <button id="add-item-btn">Add Item</button>

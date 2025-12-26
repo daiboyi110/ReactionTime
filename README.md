@@ -1,26 +1,37 @@
 # Budget Tracker App
 
-A simple and elegant web application to track your budget and expenses.
+A simple and elegant web application to track your budget and expenses with support for multiple budget categories.
 
 ## Features
 
-- Set a total budget
-- Add expense items with names and costs
-- Automatically calculates total spent
-- Shows surplus (positive balance) or deficit (negative balance)
-- Data persists in browser localStorage
-- Clean, modern UI with responsive design
+- **Multiple Budget Categories**: Create separate budgets for different categories (Food, Entertainment, Transportation, etc.)
+- **Category-Based Tracking**: Each budget category shows its own spent amount and balance
+- **Overall Budget View**: See total budget, total spent, and overall balance across all categories
+- **Add Expense Items**: Add items with names, costs, and assign them to categories
+- **Real-time Calculations**: Automatically calculates balances and shows surplus/deficit
+- **Visual Indicators**: Surplus shown in green (+), deficit shown in red (-)
+- **Data Persistence**: All data persists in browser localStorage
+- **Clean, Modern UI**: Responsive design with gradients and smooth animations
 
 ## How to Use
 
 1. Open `index.html` in your web browser
-2. Set your total budget in the "Set Your Budget" field
-3. Add expense items with their names and costs
-4. The app will automatically show:
-   - Total Budget
-   - Total Spent
-   - Balance (surplus in green, deficit in red)
-5. Delete individual items or clear all data as needed
+2. **Add Budget Categories**:
+   - Enter a category name (e.g., "Food", "Entertainment")
+   - Enter the budget amount for that category
+   - Click "Add Budget"
+   - Repeat for multiple categories
+3. **Add Expense Items**:
+   - Select a category from the dropdown
+   - Enter the item name and cost
+   - Click "Add Item"
+4. **View Your Budget**:
+   - Each category shows: Budget amount, Spent, and Balance
+   - Overall summary shows: Total Budget, Total Spent, and Overall Balance
+   - Green (+) indicates surplus, Red (-) indicates deficit
+5. **Manage Data**:
+   - Delete individual items or categories
+   - Clear all data with one button
 
 ## Technologies Used
 

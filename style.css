@@ -101,6 +101,74 @@ h2 {
     color: #f87171 !important;
 }
 
+/* Budget Categories Section */
+.budget-categories-section {
+    margin-bottom: 30px;
+}
+
+.budget-categories-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.budget-category {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: #f0f4ff;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.category-info {
+    flex: 1;
+    margin-right: 15px;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.category-name {
+    font-weight: 700;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.category-budget {
+    color: #667eea;
+    font-weight: 700;
+    font-size: 1em;
+}
+
+.category-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.category-spent {
+    color: #ef4444;
+}
+
+.category-balance {
+    font-weight: 600;
+}
+
+.category-balance.surplus {
+    color: #22c55e;
+}
+
+.category-balance.deficit {
+    color: #ef4444;
+}
+
 /* Add Item Section */
 .add-item-section {
     margin-bottom: 30px;
@@ -112,23 +180,27 @@ h2 {
     flex-wrap: wrap;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     flex: 1;
     min-width: 150px;
 }
 
 /* Input Styles */
 input[type="text"],
-input[type="number"] {
+input[type="number"],
+select {
     padding: 12px 15px;
     border: 2px solid #e0e0e0;
     border-radius: 10px;
     font-size: 1em;
     transition: all 0.3s ease;
+    background: white;
 }
 
 input[type="text"]:focus,
-input[type="number"]:focus {
+input[type="number"]:focus,
+select:focus {
     outline: none;
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -190,10 +262,15 @@ button:active {
 }
 
 .item-info {
-    display: flex;
-    justify-content: space-between;
     flex: 1;
     margin-right: 15px;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
 }
 
 .item-name {
@@ -204,6 +281,12 @@ button:active {
 .item-cost {
     color: #667eea;
     font-weight: 700;
+}
+
+.item-category {
+    font-size: 0.85em;
+    color: #888;
+    font-style: italic;
 }
 
 .delete-btn {
