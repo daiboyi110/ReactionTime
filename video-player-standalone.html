@@ -451,6 +451,16 @@
             canvas.height = videoPlayer.videoHeight;
         });
 
+        // Clear data when video restarts (seeking back to beginning)
+        videoPlayer.addEventListener('seeked', () => {
+            // If seeking to near the beginning (within first second) and pose detection is enabled
+            // Clear the data to start a fresh recording
+            if (poseDetectionEnabled && videoPlayer.currentTime < 1.0 && poseData.length > 0) {
+                clearPoseData();
+                console.log('Video restarted - pose data cleared for new recording');
+            }
+        });
+
         // Handle custom video file upload
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
