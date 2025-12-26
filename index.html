@@ -3,20 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Player</title>
+    <title>Video Player with Pose Detection</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div class="container">
         <div class="video-wrapper">
-            <h1>Video Player</h1>
-            <video id="videoPlayer" controls>
-                <source src="sample-video.mp4" type="video/mp4">
-                <source src="sample-video.webm" type="video/webm">
-                Your browser does not support the video tag.
-            </video>
+            <h1>Video Player with Pose Detection</h1>
+            <div class="video-container">
+                <video id="videoPlayer" controls crossorigin="anonymous">
+                    <source src="sample-video.mp4" type="video/mp4">
+                    <source src="sample-video.webm" type="video/webm">
+                    Your browser does not support the video tag.
+                </video>
+                <canvas id="poseCanvas"></canvas>
+            </div>
+            <div class="controls">
+                <button id="togglePose" class="toggle-button">Enable Pose Detection</button>
+                <div id="status" class="status">Pose Detection: OFF</div>
+            </div>
             <div class="video-info">
-                <p>Upload your own video file by replacing the source in the HTML, or use the file input below:</p>
+                <p>Upload your own video file with people in it to see pose detection in action!</p>
                 <input type="file" id="fileInput" accept="video/*">
             </div>
         </div>
