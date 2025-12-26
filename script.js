@@ -11,8 +11,7 @@ const recordingInfo = document.getElementById('recordingInfo');
 // Pose detection state
 let poseDetectionEnabled = false;
 let pose = null;
-let animationFrameId = null;
-let lastProcessedTime = -1;
+let videoFrameCallbackId = null;
 
 // Data collection for export
 let poseData = [];
@@ -95,29 +94,25 @@ function onPoseResults(results) {
     canvasCtx.restore();
 }
 
-// Process video frame for pose detection
-async function detectPose() {
-    if (!poseDetectionEnabled || videoPlayer.paused || videoPlayer.ended) {
+// Process video frame for pose detection (called for every video frame)
+async function detectPose(now, metadata) {
+    if (!poseDetectionEnabled) {
         return;
     }
 
-    // Only process if we've moved to a new frame (respects video's native frame rate)
-    const currentTime = videoPlayer.currentTime;
-    if (currentTime !== lastProcessedTime) {
-        lastProcessedTime = currentTime;
-
-        // Ensure canvas matches video's native resolution
-        if (canvas.width !== videoPlayer.videoWidth || canvas.height !== videoPlayer.videoHeight) {
-            canvas.width = videoPlayer.videoWidth;
-            canvas.height = videoPlayer.videoHeight;
-        }
-
-        // Send frame to pose detection at video's actual sampling rate
-        await pose.send({ image: videoPlayer });
+    // Ensure canvas matches video's native resolution
+    if (canvas.width !== videoPlayer.videoWidth || canvas.height !== videoPlayer.videoHeight) {
+        canvas.width = videoPlayer.videoWidth;
+        canvas.height = videoPlayer.videoHeight;
     }
 
-    // Schedule next check
-    animationFrameId = requestAnimationFrame(detectPose);
+    // Send frame to pose detection (processes every video frame at native frame rate)
+    await pose.send({ image: videoPlayer });
+
+    // Schedule next frame callback (will be called for every video frame)
+    if (poseDetectionEnabled && !videoPlayer.paused && !videoPlayer.ended) {
+        videoFrameCallbackId = videoPlayer.requestVideoFrameCallback(detectPose);
+    }
 }
 
 // Toggle pose detection
@@ -138,12 +133,9 @@ toggleButton.addEventListener('click', () => {
         // Clear previous data and start fresh
         clearPoseData();
 
-        // Reset time tracking to start fresh
-        lastProcessedTime = -1;
-
         // Start detection if video is playing
-        if (!videoPlayer.paused) {
-            detectPose();
+        if (!videoPlayer.paused && !videoPlayer.ended) {
+            videoFrameCallbackId = videoPlayer.requestVideoFrameCallback(detectPose);
         }
     } else {
         toggleButton.textContent = 'Enable Pose Detection';
@@ -154,30 +146,26 @@ toggleButton.addEventListener('click', () => {
         // Clear canvas
         canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Cancel animation frame
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
+        // Cancel video frame callback
+        if (videoFrameCallbackId) {
+            videoPlayer.cancelVideoFrameCallback(videoFrameCallbackId);
+            videoFrameCallbackId = null;
         }
-
-        // Reset time tracking
-        lastProcessedTime = -1;
     }
 });
 
 // Start pose detection when video plays
 videoPlayer.addEventListener('play', () => {
     if (poseDetectionEnabled && pose) {
-        lastProcessedTime = -1; // Reset to ensure we process from current position
-        detectPose();
+        videoFrameCallbackId = videoPlayer.requestVideoFrameCallback(detectPose);
     }
 });
 
 // Stop pose detection when video pauses
 videoPlayer.addEventListener('pause', () => {
-    if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
+    if (videoFrameCallbackId) {
+        videoPlayer.cancelVideoFrameCallback(videoFrameCallbackId);
+        videoFrameCallbackId = null;
     }
 });
 
@@ -196,9 +184,6 @@ fileInput.addEventListener('change', function(e) {
         videoPlayer.src = fileURL;
         videoPlayer.load();
         videoPlayer.play();
-
-        // Reset time tracking for new video
-        lastProcessedTime = -1;
 
         // Clear previous pose data for new video
         clearPoseData();
