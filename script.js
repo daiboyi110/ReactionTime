@@ -31,11 +31,23 @@ const LANDMARK_NAMES = [
 // Initialize MediaPipe Pose (async version)
 async function initializePoseAsync() {
     console.log('Initializing MediaPipe Pose...');
+    console.log('Checking if Pose class is available:', typeof Pose);
+    console.log('Window.Pose:', window.Pose);
 
     return new Promise((resolve, reject) => {
         try {
+            // Check if Pose class is available
+            if (typeof Pose === 'undefined') {
+                const errorMsg = 'MediaPipe Pose library not loaded. Please refresh the page.';
+                console.error(errorMsg);
+                alert(errorMsg);
+                reject(new Error(errorMsg));
+                return;
+            }
+
             pose = new Pose({
                 locateFile: (file) => {
+                    console.log('Loading file:', file);
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/pose@0.5/${file}`;
                 }
             });
@@ -58,10 +70,12 @@ async function initializePoseAsync() {
             // Give it a moment to load
             setTimeout(() => {
                 resolve();
-            }, 500);
+            }, 1000);
 
         } catch (error) {
             console.error('Error creating Pose instance:', error);
+            console.error('Error details:', error.message, error.stack);
+            alert('Failed to initialize pose detection: ' + error.message + '. Check browser console for details.');
             reject(error);
         }
     });
@@ -96,18 +110,11 @@ function onPoseResults(results) {
         poseData.push(frameData);
         updateRecordingInfo();
 
-        // Draw connectors (skeleton)
-        drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {
-            color: '#00FF00',
-            lineWidth: 4
-        });
+        // Draw connectors (skeleton) using custom draw function
+        drawPoseConnections(canvasCtx, results.poseLandmarks);
 
-        // Draw landmarks (joints)
-        drawLandmarks(canvasCtx, results.poseLandmarks, {
-            color: '#FF0000',
-            lineWidth: 2,
-            radius: 6
-        });
+        // Draw landmarks (joints) using custom draw function
+        drawPoseLandmarks(canvasCtx, results.poseLandmarks);
     }
 
     canvasCtx.restore();
@@ -340,16 +347,16 @@ exportButton.addEventListener('click', exportToExcel);
 // Initialize export button state
 updateRecordingInfo();
 
-// Helper function to draw connectors
-function drawConnectors(ctx, landmarks, connections, style) {
-    connections.forEach(([start, end]) => {
+// Helper function to draw pose connections (skeleton)
+function drawPoseConnections(ctx, landmarks) {
+    POSE_CONNECTIONS.forEach(([start, end]) => {
         const startPoint = landmarks[start];
         const endPoint = landmarks[end];
 
-        if (startPoint && endPoint) {
+        if (startPoint && endPoint && startPoint.visibility > 0.5 && endPoint.visibility > 0.5) {
             ctx.beginPath();
-            ctx.strokeStyle = style.color;
-            ctx.lineWidth = style.lineWidth;
+            ctx.strokeStyle = '#00FF00';
+            ctx.lineWidth = 4;
             ctx.moveTo(startPoint.x * canvas.width, startPoint.y * canvas.height);
             ctx.lineTo(endPoint.x * canvas.width, endPoint.y * canvas.height);
             ctx.stroke();
@@ -357,22 +364,24 @@ function drawConnectors(ctx, landmarks, connections, style) {
     });
 }
 
-// Helper function to draw landmarks
-function drawLandmarks(ctx, landmarks, style) {
+// Helper function to draw pose landmarks (joints)
+function drawPoseLandmarks(ctx, landmarks) {
     landmarks.forEach((landmark) => {
-        ctx.beginPath();
-        ctx.arc(
-            landmark.x * canvas.width,
-            landmark.y * canvas.height,
-            style.radius,
-            0,
-            2 * Math.PI
-        );
-        ctx.fillStyle = style.color;
-        ctx.fill();
-        ctx.strokeStyle = '#FFFFFF';
-        ctx.lineWidth = style.lineWidth;
-        ctx.stroke();
+        if (landmark.visibility > 0.5) {
+            ctx.beginPath();
+            ctx.arc(
+                landmark.x * canvas.width,
+                landmark.y * canvas.height,
+                6,
+                0,
+                2 * Math.PI
+            );
+            ctx.fillStyle = '#FF0000';
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
     });
 }
 
