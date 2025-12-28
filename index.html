@@ -8,12 +8,16 @@
 </head>
 <body>
     <div class="container">
-        <h1>Reaction Time Test</h1>
+        <div class="language-toggle">
+            <button id="lang-en" class="lang-btn active">English</button>
+            <button id="lang-zh" class="lang-btn">中文</button>
+        </div>
+        <h1 id="title">Reaction Time Test</h1>
         <div class="mode-selection" id="mode-selection">
-            <h3>Select Test Mode:</h3>
+            <h3 id="select-mode-text">Select Test Mode:</h3>
             <div class="mode-buttons">
-                <button id="mode1-btn" class="mode-btn">Model 1: Reaction Time Only</button>
-                <button id="mode2-btn" class="mode-btn">Model 2: Reaction + Movement Time</button>
+                <button id="mode1-btn" class="mode-btn"><span id="mode1-text">Model 1: Reaction Time Only</span></button>
+                <button id="mode2-btn" class="mode-btn"><span id="mode2-text">Model 2: Reaction + Movement Time</span></button>
             </div>
         </div>
         <div id="target" class="target"></div>
@@ -24,29 +28,29 @@
             <p id="current-mode"></p>
             <p id="result"></p>
             <p id="average"></p>
-            <button id="reset-btn" style="display: none;">Reset Stats</button>
-            <button id="change-mode-btn" style="display: none;">Change Mode</button>
+            <button id="reset-btn" style="display: none;"><span id="reset-btn-text">Reset Stats</span></button>
+            <button id="change-mode-btn" style="display: none;"><span id="change-mode-btn-text">Change Mode</span></button>
         </div>
         <div class="instructions">
-            <h3>How to play:</h3>
+            <h3 id="instructions-title">How to play:</h3>
             <div id="instructions-mode1" style="display: none;">
-                <p><strong>Model 1: Reaction Time Only</strong></p>
+                <p><strong id="inst-mode1-title">Model 1: Reaction Time Only</strong></p>
                 <ul>
-                    <li>Click the box to start</li>
-                    <li>Wait for the color to change to green</li>
-                    <li>Click as fast as you can when it turns green</li>
-                    <li>Your reaction time will be displayed</li>
+                    <li id="inst-mode1-step1">Click the box to start</li>
+                    <li id="inst-mode1-step2">Wait for the color to change to green</li>
+                    <li id="inst-mode1-step3">Click as fast as you can when it turns green</li>
+                    <li id="inst-mode1-step4">Your reaction time will be displayed</li>
                 </ul>
             </div>
             <div id="instructions-mode2" style="display: none;">
-                <p><strong>Model 2: Reaction + Movement Time</strong></p>
+                <p><strong id="inst-mode2-title">Model 2: Reaction + Movement Time</strong></p>
                 <ul>
-                    <li>Click the box to start</li>
-                    <li>Wait for the color to change to green</li>
-                    <li>Click as fast as you can when it turns green</li>
-                    <li>A target will appear 200 pixels away from your click</li>
-                    <li>Reach and click the target as fast as possible</li>
-                    <li>Both reaction and movement times will be displayed</li>
+                    <li id="inst-mode2-step1">Click the box to start</li>
+                    <li id="inst-mode2-step2">Wait for the color to change to green</li>
+                    <li id="inst-mode2-step3">Click as fast as you can when it turns green</li>
+                    <li id="inst-mode2-step4">A target will appear 200 pixels away from your click</li>
+                    <li id="inst-mode2-step5">Reach and click the target as fast as possible</li>
+                    <li id="inst-mode2-step6">Both reaction and movement times will be displayed</li>
                 </ul>
             </div>
         </div>

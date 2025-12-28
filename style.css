@@ -31,6 +31,34 @@ h1 {
     font-size: 2.5em;
 }
 
+.language-toggle {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.lang-btn {
+    background-color: #ecf0f1;
+    color: #333;
+    border: 2px solid #bdc3c7;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.lang-btn:hover {
+    background-color: #bdc3c7;
+}
+
+.lang-btn.active {
+    background-color: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
 .mode-selection {
     text-align: center;
     margin-bottom: 30px;
