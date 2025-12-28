@@ -9,22 +9,46 @@
 <body>
     <div class="container">
         <h1>Reaction Time Test</h1>
-        <div id="game-area" class="game-area">
+        <div class="mode-selection" id="mode-selection">
+            <h3>Select Test Mode:</h3>
+            <div class="mode-buttons">
+                <button id="mode1-btn" class="mode-btn">Model 1: Reaction Time Only</button>
+                <button id="mode2-btn" class="mode-btn">Model 2: Reaction + Movement Time</button>
+            </div>
+        </div>
+        <div id="target" class="target"></div>
+        <div id="game-area" class="game-area" style="display: none;">
             <p id="message">Click to start</p>
         </div>
         <div class="stats">
+            <p id="current-mode"></p>
             <p id="result"></p>
             <p id="average"></p>
             <button id="reset-btn" style="display: none;">Reset Stats</button>
+            <button id="change-mode-btn" style="display: none;">Change Mode</button>
         </div>
         <div class="instructions">
             <h3>How to play:</h3>
-            <ul>
-                <li>Click the box to start</li>
-                <li>Wait for the color to change to green</li>
-                <li>Click as fast as you can when it turns green</li>
-                <li>Your reaction time will be displayed</li>
-            </ul>
+            <div id="instructions-mode1" style="display: none;">
+                <p><strong>Model 1: Reaction Time Only</strong></p>
+                <ul>
+                    <li>Click the box to start</li>
+                    <li>Wait for the color to change to green</li>
+                    <li>Click as fast as you can when it turns green</li>
+                    <li>Your reaction time will be displayed</li>
+                </ul>
+            </div>
+            <div id="instructions-mode2" style="display: none;">
+                <p><strong>Model 2: Reaction + Movement Time</strong></p>
+                <ul>
+                    <li>Click the box to start</li>
+                    <li>Wait for the color to change to green</li>
+                    <li>Click as fast as you can when it turns green</li>
+                    <li>A target will appear 200 pixels away from your click</li>
+                    <li>Reach and click the target as fast as possible</li>
+                    <li>Both reaction and movement times will be displayed</li>
+                </ul>
+            </div>
         </div>
     </div>
     <script src="script.js"></script>

@@ -21,6 +21,7 @@ body {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     max-width: 600px;
     width: 100%;
+    position: relative;
 }
 
 h1 {
@@ -28,6 +29,75 @@ h1 {
     color: #333;
     margin-bottom: 30px;
     font-size: 2.5em;
+}
+
+.mode-selection {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.mode-selection h3 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+}
+
+.mode-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.mode-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 10px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.mode-btn:hover {
+    background-color: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mode-btn:active {
+    transform: translateY(0);
+}
+
+.target {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    background-color: #e74c3c;
+    border-radius: 50%;
+    display: none;
+    cursor: pointer;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.5);
+    transition: transform 0.1s ease;
+}
+
+.target:hover {
+    transform: scale(1.1);
+}
+
+.target::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
 }
 
 .game-area {
@@ -80,7 +150,7 @@ h1 {
     font-size: 1.5em;
 }
 
-#reset-btn {
+#reset-btn, #change-mode-btn {
     background-color: #e74c3c;
     color: white;
     border: none;
@@ -89,11 +159,26 @@ h1 {
     font-size: 1em;
     cursor: pointer;
     margin-top: 10px;
+    margin-right: 10px;
     transition: background-color 0.3s ease;
 }
 
-#reset-btn:hover {
+#reset-btn:hover, #change-mode-btn:hover {
     background-color: #c0392b;
+}
+
+#change-mode-btn {
+    background-color: #3498db;
+}
+
+#change-mode-btn:hover {
+    background-color: #2980b9;
+}
+
+#current-mode {
+    font-weight: bold;
+    color: #667eea;
+    font-size: 1.1em;
 }
 
 .instructions {
