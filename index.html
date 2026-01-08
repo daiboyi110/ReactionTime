@@ -18,6 +18,8 @@
             <div class="mode-buttons">
                 <button id="mode1-btn" class="mode-btn"><span id="mode1-text">Model 1: Reaction Time Only</span></button>
                 <button id="mode2-btn" class="mode-btn"><span id="mode2-text">Model 2: Reaction + Movement Time</span></button>
+                <button id="mode3-btn" class="mode-btn"><span id="mode3-text">Model 3: Choice Reaction Time</span></button>
+                <button id="mode4-btn" class="mode-btn"><span id="mode4-text">Model 4: Go/No-Go Reaction Time</span></button>
             </div>
         </div>
         <div id="target" class="target"></div>
@@ -51,6 +53,28 @@
                     <li id="inst-mode2-step4">A target will appear 200 pixels away from your click</li>
                     <li id="inst-mode2-step5">Reach and click the target as fast as possible</li>
                     <li id="inst-mode2-step6">Both reaction and movement times will be displayed</li>
+                </ul>
+            </div>
+            <div id="instructions-mode3" style="display: none;">
+                <p><strong id="inst-mode3-title">Model 3: Choice Reaction Time</strong></p>
+                <ul>
+                    <li id="inst-mode3-step1">Click the box to start</li>
+                    <li id="inst-mode3-step2">Wait for the color to change to either green or yellow</li>
+                    <li id="inst-mode3-step3">If GREEN: Click with LEFT mouse button as fast as you can</li>
+                    <li id="inst-mode3-step4">If YELLOW: Click with RIGHT mouse button as fast as you can</li>
+                    <li id="inst-mode3-step5">Your choice reaction time will be displayed</li>
+                    <li id="inst-mode3-step6">Incorrect button clicks will be marked as errors</li>
+                </ul>
+            </div>
+            <div id="instructions-mode4" style="display: none;">
+                <p><strong id="inst-mode4-title">Model 4: Go/No-Go Reaction Time</strong></p>
+                <ul>
+                    <li id="inst-mode4-step1">Click the box to start</li>
+                    <li id="inst-mode4-step2">Colors will continuously change (red, yellow, blue, purple, etc.)</li>
+                    <li id="inst-mode4-step3">ONLY click when the color turns GREEN</li>
+                    <li id="inst-mode4-step4">DO NOT click on any other colors</li>
+                    <li id="inst-mode4-step5">Your reaction time will be displayed</li>
+                    <li id="inst-mode4-step6">Clicking on wrong colors will be marked as errors</li>
                 </ul>
             </div>
         </div>

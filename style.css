@@ -161,6 +161,35 @@ h1 {
     background-color: #f39c12;
 }
 
+.game-area.choice-yellow {
+    background-color: #f1c40f;
+}
+
+/* Mode 4 color cycling styles */
+.game-area.color-red {
+    background-color: #e74c3c;
+}
+
+.game-area.color-yellow {
+    background-color: #f1c40f;
+}
+
+.game-area.color-blue {
+    background-color: #3498db;
+}
+
+.game-area.color-purple {
+    background-color: #9b59b6;
+}
+
+.game-area.color-orange {
+    background-color: #e67e22;
+}
+
+.game-area.color-pink {
+    background-color: #fd79a8;
+}
+
 .stats {
     text-align: center;
     margin-bottom: 20px;
